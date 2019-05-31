@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -18,8 +19,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
-
-import br.com.diogo.pattern.solutions.Utils;
 
 @Repository
 public class StrategyFactory implements IStrategy {
@@ -44,11 +43,11 @@ public class StrategyFactory implements IStrategy {
 	private void verificarEstrategiasAnotadas(Collection<Object> beansAnotados) {
 		Set<String> estrategiasUtilizadas = new HashSet<>();
 
-		if (!Utils.nuloOuVazio(beansAnotados)) {
+		if (Objects.nonNull(beansAnotados)) {
 			beansAnotados.forEach(bean -> {
 				Strategy strategy = AnnotationUtils.findAnnotation(bean.getClass(), Strategy.class);
 
-				if (Utils.nuloOuVazio(strategy)) {
+				if (Objects.isNull(strategy)) {
 					try {
 						Object target = ((Advised) bean).getTargetSource().getTarget();
 						strategy = AnnotationUtils.findAnnotation(target.getClass(), Strategy.class);
@@ -63,7 +62,7 @@ public class StrategyFactory implements IStrategy {
 					adicionarCasoNaoExista(strategy.tipoEstrategia(), "default", estrategiasUtilizadas);
 				}
 
-				if (!Utils.nuloOuVazio(strategy.eventos())) {
+				if (Objects.nonNull(strategy.eventos())) {
 					for (String string : strategy.eventos()) {
 						adicionarCasoNaoExista(strategy.tipoEstrategia(), string, estrategiasUtilizadas);
 					}
@@ -118,7 +117,7 @@ public class StrategyFactory implements IStrategy {
 		Object defaultStrategy = null;
 		for (Object bean : beansAssociadosInterface) {
 			Strategy strategy = strategyCache.get(bean.getClass());
-			if (!Utils.nuloOuVazio(enumAtual)) {
+			if (Objects.nonNull(enumAtual)) {
 				for (String evento : strategy.eventos()) {
 					if (evento.equalsIgnoreCase(enumAtual)) {
 						LOG.debug("Encontrada a estratégia para o tipo '" + strategy.tipoEstrategia() + "' enum = '"
@@ -130,7 +129,7 @@ public class StrategyFactory implements IStrategy {
 
 			if (isDefault(strategy)) {
 				defaultStrategy = bean;
-				if (Utils.nuloOuVazio(enumAtual)) {
+				if (Objects.isNull(enumAtual)) {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("Nenhum enum selecionado, retornando a estratégia default.");
 					}
