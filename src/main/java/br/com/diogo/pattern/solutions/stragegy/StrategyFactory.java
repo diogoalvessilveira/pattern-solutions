@@ -62,8 +62,8 @@ public class StrategyFactory implements IStrategy {
 					adicionarCasoNaoExista(strategy.tipoEstrategia(), "default", estrategiasUtilizadas);
 				}
 
-				if (Objects.nonNull(strategy.eventos())) {
-					for (String string : strategy.eventos()) {
+				if (Objects.nonNull(strategy.regras())) {
+					for (String string : strategy.regras()) {
 						adicionarCasoNaoExista(strategy.tipoEstrategia(), string, estrategiasUtilizadas);
 					}
 				}
@@ -72,7 +72,7 @@ public class StrategyFactory implements IStrategy {
 	}
 
 	private boolean isDefault(Strategy strategy) {
-		return strategy.eventos().length == 0;
+		return strategy.regras().length == 0;
 	}
 
 	private String criarChave(Class<?> classe, String nomeEnum) {
@@ -100,28 +100,28 @@ public class StrategyFactory implements IStrategy {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getStrategy(Class<T> interfaceUtilizadaComoEstrategia, String enumAtual) {
+	public <T> T getStrategy(Class<T> interfaceUtilizadaComoEstrategia, String regraAtual) {
 		List<Object> beansAssociadosInterface = tiposAnotados.get(interfaceUtilizadaComoEstrategia);
 		Assert.notEmpty(beansAssociadosInterface, "Nenhuma estratégia encontrada para a classe'"
 				+ interfaceUtilizadaComoEstrategia.getName() + "', săo as estratégias marcadas com @Strategy");
 
-		Object eventoStrategy = obterEstrategiaDoEvento(beansAssociadosInterface, enumAtual);
-		if (eventoStrategy == null) {
+		Object regraStrategy = obterEstrategiaDaRegra(beansAssociadosInterface, regraAtual);
+		if (regraStrategy == null) {
 			throw new RuntimeException(
 					"Nenhuma estratégia encontrada para a classe '" + interfaceUtilizadaComoEstrategia + "'");
 		}
-		return (T) eventoStrategy;
+		return (T) regraStrategy;
 	}
 
-	private Object obterEstrategiaDoEvento(List<Object> beansAssociadosInterface, String enumAtual) {
+	private Object obterEstrategiaDaRegra(List<Object> beansAssociadosInterface, String regraAtual) {
 		Object defaultStrategy = null;
 		for (Object bean : beansAssociadosInterface) {
 			Strategy strategy = strategyCache.get(bean.getClass());
-			if (Objects.nonNull(enumAtual)) {
-				for (String evento : strategy.eventos()) {
-					if (evento.equalsIgnoreCase(enumAtual)) {
-						LOG.debug("Encontrada a estratégia para o tipo '" + strategy.tipoEstrategia() + "' enum = '"
-								+ enumAtual + "'");
+			if (Objects.nonNull(regraAtual)) {
+				for (String regra : strategy.regras()) {
+					if (regra.equalsIgnoreCase(regraAtual)) {
+						LOG.debug("Encontrada a estratégia para o tipo '" + strategy.tipoEstrategia() + "' regra = '"
+								+ regraAtual + "'");
 						return bean;
 					}
 				}
@@ -129,9 +129,9 @@ public class StrategyFactory implements IStrategy {
 
 			if (isDefault(strategy)) {
 				defaultStrategy = bean;
-				if (Objects.isNull(enumAtual)) {
+				if (Objects.isNull(regraAtual)) {
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("Nenhum enum selecionado, retornando a estratégia default.");
+						LOG.debug("Nenhuma regra selecionada, retornando a estratégia default.");
 					}
 					return defaultStrategy;
 				}
@@ -139,7 +139,7 @@ public class StrategyFactory implements IStrategy {
 		}
 		if (LOG.isDebugEnabled()) {
 			if (defaultStrategy != null) {
-				LOG.debug("Nenhum enum específico encontrado, retornando a estratégia default.");
+				LOG.debug("Nenhuma regra específico encontrada, retornando a estratégia default.");
 			}
 		}
 		return defaultStrategy;

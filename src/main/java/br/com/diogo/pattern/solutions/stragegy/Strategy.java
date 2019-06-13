@@ -15,7 +15,5 @@ import org.springframework.stereotype.Component;
 public @interface Strategy {
 	Class<?> tipoEstrategia();
 
-	// Class<? extends Enum<?>> classeEnum();
-
-	String[] eventos() default {};
+	String[] regras() default {};
 }
