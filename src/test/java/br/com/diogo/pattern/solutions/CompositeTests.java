@@ -15,7 +15,7 @@ import br.com.diogo.pattern.solutions.builder.Builder;
 public class CompositeTests {
 
 	@Test
-	public void createBuilder() {
+	public void composite() {
 		TestandoA teste1 = Builder.build(TestandoA.class).with(t -> t.setNome("Filho1")).toBuilder();
 		TestandoA teste3 = Builder.build(TestandoA.class).with(t -> t.setNome("Filho do filho2")).toBuilder();
 		TestandoA teste2 = Builder.build(TestandoA.class).with(t -> t.setNome("Filho2")).with(t -> t.add(teste3))

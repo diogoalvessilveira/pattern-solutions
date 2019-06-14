@@ -16,7 +16,7 @@ public class StrategyTests {
 	private IStrategy strategy;
 
 	@Test
-	public void contextLoads() {
+	public void strategy() {
 		strategy.getStrategy(EstrategiaTeste.class, "TESTE2").teste();
 		strategy.getStrategy(EstrategiaTeste.class, "TESTE").teste();
 	}
