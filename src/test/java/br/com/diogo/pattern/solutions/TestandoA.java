@@ -1,9 +1,10 @@
 package br.com.diogo.pattern.solutions;
 
+import br.com.diogo.pattern.solutions.composite.Composite;
 import br.com.diogo.pattern.solutions.stragegy.Strategy;
 
 @Strategy(tipoEstrategia = EstrategiaTeste.class, regras = "TESTE")
-public class TestandoA implements EstrategiaTeste {
+public class TestandoA extends Composite<TestandoA> implements EstrategiaTeste {
 
 	private String nome;
 
