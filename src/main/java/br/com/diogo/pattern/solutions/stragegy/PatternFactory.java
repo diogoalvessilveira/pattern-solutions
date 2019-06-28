@@ -1,5 +1,6 @@
 package br.com.diogo.pattern.solutions.stragegy;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Observable;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -20,24 +22,46 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
+import br.com.diogo.pattern.solutions.observer.ObserverPattern;
+
 @Repository
-public class StrategyFactory implements IStrategy {
-	private static final Logger LOG = LoggerFactory.getLogger(StrategyFactory.class);
+public class PatternFactory implements IStrategy {
+	private static final Logger LOG = LoggerFactory.getLogger(PatternFactory.class);
 	private @Autowired ApplicationContext applicationContext;
 
 	private Map<Class<?>, List<Object>> tiposAnotados = new HashMap<>();
 	private Map<Class<?>, Strategy> strategyCache = new HashMap<>();
+	private Map<Class<?>, ObserverPattern> observerCache = new HashMap<>();
+	private Map<Class<? extends Observable>, List<Object>> observersAnotados = new HashMap<>();
 
 	@PostConstruct
 	public void init() {
-		Map<String, Object> beansAnotados = applicationContext.getBeansWithAnnotation(Strategy.class);
-		Collection<Object> colecao = beansAnotados.values();
+		strategy();
+	}
+
+	private void strategy() {
+		Collection<Object> colecao = getColecaoBeansAnotados(Strategy.class);
 		verificarEstrategiasAnotadas(colecao);
 
 		for (Object bean : colecao) {
 			Strategy strategy = strategyCache.get(bean.getClass());
 			getBeansComMesmoTipoDeEstrategia(strategy).add(bean);
 		}
+	}
+
+	private void observer() {
+		Collection<Object> colecao = getColecaoBeansAnotados(ObserverPattern.class);
+		// TODO verificarEstrategiasAnotadas(colecao);
+
+		for (Object bean : colecao) {
+			ObserverPattern observer = observerCache.get(bean.getClass());
+			// TODO getBeansComMesmoTipoDeEstrategia(strategy).add(bean);
+		}
+	}
+
+	private Collection<Object> getColecaoBeansAnotados(Class<? extends Annotation> classeAnotacao) {
+		Map<String, Object> beansAnotados = applicationContext.getBeansWithAnnotation(classeAnotacao);
+		return beansAnotados.values();
 	}
 
 	private void verificarEstrategiasAnotadas(Collection<Object> beansAnotados) {
