@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions.stragegy;
+package br.com.diogo.pattern.solutions.pattern;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -23,20 +24,23 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import br.com.diogo.pattern.solutions.observer.ObserverPattern;
+import br.com.diogo.pattern.solutions.stragegy.Strategy;
 
 @Repository
-public class PatternFactory implements IStrategy {
+public class PatternFactory implements Pattern {
 	private static final Logger LOG = LoggerFactory.getLogger(PatternFactory.class);
 	private @Autowired ApplicationContext applicationContext;
 
 	private Map<Class<?>, List<Object>> tiposAnotados = new HashMap<>();
 	private Map<Class<?>, Strategy> strategyCache = new HashMap<>();
-	private Map<Class<?>, ObserverPattern> observerCache = new HashMap<>();
-	private Map<Class<? extends Observable>, List<Object>> observersAnotados = new HashMap<>();
+	private Map<Class<? extends Observer>, ObserverPattern> observerCache = new HashMap<>();
+	private Map<Class<? extends Observable>, List<Observer>> observersAnotados = new HashMap<>();
+	private List<Observable> observables;
 
 	@PostConstruct
 	public void init() {
 		strategy();
+		observer();
 	}
 
 	private void strategy() {
@@ -51,12 +55,26 @@ public class PatternFactory implements IStrategy {
 
 	private void observer() {
 		Collection<Object> colecao = getColecaoBeansAnotados(ObserverPattern.class);
-		// TODO verificarEstrategiasAnotadas(colecao);
+		verificarObserversAnotados(colecao);
 
 		for (Object bean : colecao) {
 			ObserverPattern observer = observerCache.get(bean.getClass());
-			// TODO getBeansComMesmoTipoDeEstrategia(strategy).add(bean);
+			getBeans(observer.observable(), observersAnotados).add((Observer) bean);
 		}
+
+		observables = new ArrayList<>();
+		observersAnotados.forEach((k, v) -> {
+			try {
+				Observable observable = k.newInstance();
+				v.forEach(valor -> {
+					observable.addObserver(valor);
+				});
+				observables.add(observable);
+			} catch (InstantiationException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	}
 
 	private Collection<Object> getColecaoBeansAnotados(Class<? extends Annotation> classeAnotacao) {
@@ -95,6 +113,29 @@ public class PatternFactory implements IStrategy {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private void verificarObserversAnotados(Collection<Object> beansAnotados) {
+		Set<String> observerUtilizados = new HashSet<>();
+
+		if (Objects.nonNull(beansAnotados)) {
+			beansAnotados.forEach(bean -> {
+				ObserverPattern observer = AnnotationUtils.findAnnotation(bean.getClass(), ObserverPattern.class);
+
+				if (Objects.isNull(observer)) {
+					try {
+						Object target = ((Advised) bean).getTargetSource().getTarget();
+						observer = AnnotationUtils.findAnnotation(target.getClass(), ObserverPattern.class);
+					} catch (Exception e) {
+						LOG.error("Năo foi possível utilizar a estratégia com anotaçăo para o bean!", e);
+					}
+				}
+
+				observerCache.put((Class<? extends Observer>) bean.getClass(), observer);
+				adicionarCasoNaoExista(observer.observable(), bean.getClass().getName(), observerUtilizados);
+			});
+		}
+	}
+
 	private boolean isDefault(Strategy strategy) {
 		return strategy.regras().length == 0;
 	}
@@ -104,12 +145,13 @@ public class PatternFactory implements IStrategy {
 	}
 
 	private void adicionarCasoNaoExista(Class<?> classeEstrategia, String nomeEnum, Set<String> estrategiasUtilizadas) {
-		if (estrategiasUtilizadas.contains(criarChave(classeEstrategia, nomeEnum))) {
+		String chave = criarChave(classeEstrategia, nomeEnum);
+		if (estrategiasUtilizadas.contains(chave)) {
 			throw new RuntimeException(
 					"Năo é possível aplicar somente uma estratégia, pois foi identificado que há multiplas estratégias para a classe '"
 							+ classeEstrategia + "' e Enum '" + nomeEnum + "'");
 		}
-		estrategiasUtilizadas.add(criarChave(classeEstrategia, nomeEnum));
+		estrategiasUtilizadas.add(chave);
 	}
 
 	private List<Object> getBeansComMesmoTipoDeEstrategia(Strategy strategy) {
@@ -119,6 +161,18 @@ public class PatternFactory implements IStrategy {
 		} else {
 			List<Object> novaListaBeans = new ArrayList<>();
 			tiposAnotados.put(strategy.tipoEstrategia(), novaListaBeans);
+			return novaListaBeans;
+		}
+	}
+
+	private List<Observer> getBeans(Class<? extends Observable> classe,
+			Map<Class<? extends Observable>, List<Observer>> mapa) {
+		List<Observer> beans = mapa.get(classe);
+		if (beans != null) {
+			return beans;
+		} else {
+			List<Observer> novaListaBeans = new ArrayList<>();
+			mapa.put(classe, novaListaBeans);
 			return novaListaBeans;
 		}
 	}
@@ -135,6 +189,11 @@ public class PatternFactory implements IStrategy {
 					"Nenhuma estratégia encontrada para a classe '" + interfaceUtilizadaComoEstrategia + "'");
 		}
 		return (T) regraStrategy;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Observable> T getObserver(Class<T> observable) {
+		return (T) observables.stream().filter(o -> o.getClass().equals(observable)).findFirst().get();
 	}
 
 	private Object obterEstrategiaDaRegra(List<Object> beansAssociadosInterface, String regraAtual) {

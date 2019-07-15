@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions;
+package br.com.diogo.pattern.solutions.tests;
 
 import br.com.diogo.pattern.solutions.composite.Composite;
 import br.com.diogo.pattern.solutions.stragegy.Strategy;
@@ -17,8 +17,8 @@ public class TestandoA extends Composite<TestandoA> implements EstrategiaTeste {
 	}
 
 	@Override
-	public void teste() {
-		System.out.println("Executou A");
+	public String teste() {
+		return "Executou A";
 	}
 
 }

@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions;
+package br.com.diogo.pattern.solutions.tests;
 
 import java.util.Objects;
 

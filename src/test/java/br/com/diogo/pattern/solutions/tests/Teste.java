@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions;
+package br.com.diogo.pattern.solutions.tests;
 
 public enum Teste {
 	TESTE(1, "Um"), TESTE2(2, "Dois");

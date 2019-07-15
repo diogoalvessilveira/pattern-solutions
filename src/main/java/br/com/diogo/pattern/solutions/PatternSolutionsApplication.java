@@ -9,4 +9,5 @@ public class PatternSolutionsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PatternSolutionsApplication.class, args);
 	}
+
 }

@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions;
+package br.com.diogo.pattern.solutions.tests;
 
 import br.com.diogo.pattern.solutions.stragegy.Strategy;
 
@@ -6,8 +6,8 @@ import br.com.diogo.pattern.solutions.stragegy.Strategy;
 public class TestandoB implements EstrategiaTeste {
 
 	@Override
-	public void teste() {
-		System.out.println("Executou B");
+	public String teste() {
+		return "Executou B";
 	}
 
 }
