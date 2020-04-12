@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions.tests;
+package br.com.diogo.pattern.solutions.builder.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import br.com.diogo.pattern.solutions.builder.Builder;
+import br.com.diogo.pattern.solutions.tests.TestandoA;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

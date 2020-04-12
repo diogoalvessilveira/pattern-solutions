@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions.tests;
+package br.com.diogo.pattern.solutions.observer.tests;
 
 import java.util.Observable;
 import java.util.Observer;

@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions.tests;
+package br.com.diogo.pattern.solutions.strategy.tests;
 
 import static org.junit.Assert.assertEquals;
 

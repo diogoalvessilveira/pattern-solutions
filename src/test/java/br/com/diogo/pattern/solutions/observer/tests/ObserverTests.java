@@ -1,4 +1,4 @@
-package br.com.diogo.pattern.solutions.tests;
+package br.com.diogo.pattern.solutions.observer.tests;
 
 import static org.junit.Assert.assertTrue;
 
